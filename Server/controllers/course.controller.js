@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import Course from "../models/course.model.js";
 import AppError from "../utils/error.util.js";
-import cloudinary from "../config/cloudinary.js";
+import v2 from "../config/cloudinary.js";
+import fs from "fs/promises";
+import path from "path";
 
 // Utility: Validate thumbnail file
 const validateThumbnail = (file) => {
@@ -162,7 +164,6 @@ const removeCourse = async (req, res, next) => {
     return next(new AppError(error.message, 500));
   }
 };
-
 const addLectureToCourseById = async (req, res, next) => {
   const { title, description } = req.body;
   const { id } = req.params;
@@ -182,31 +183,34 @@ const addLectureToCourseById = async (req, res, next) => {
   // Run only if user sends a file
   if (req.file) {
     try {
-      const result = await cloudinary.v2.uploader.upload(req.file.path, {
-        folder: "lms", // Save files in a folder named lms
-        chunk_size: 50000000, // 50 mb size
+      const result = await v2.uploader.upload(req.file.path, {
+        folder: "lms",
+        chunk_size: 50000000, // 50 MB
         resource_type: "video",
       });
 
-      // If success
       if (result) {
-        // Set the public_id and secure_url in array
         lectureData.public_id = result.public_id;
         lectureData.secure_url = result.secure_url;
       }
 
-      // After successful upload remove the file from local storage
-      fs.rm(`uploads/${req.file.filename}`);
+      // Remove the uploaded file from local storage
+      await fs.rm(`uploads/${req.file.filename}`);
     } catch (error) {
-      // Empty the uploads directory without deleting the uploads directory
-      for (const file of await fs.readdir("uploads/")) {
-        await fs.unlink(path.join("uploads/", file));
+      // Clean up uploads folder
+      try {
+        const files = await fs.readdir("uploads/");
+        for (const file of files) {
+          await fs.unlink(path.join("uploads/", file));
+        }
+      } catch (fsErr) {
+        console.error("Failed to clean up uploads folder:", fsErr);
       }
 
-      // Send the error message
+      console.error("Cloudinary Upload Error:", error);
       return next(
         new AppError(
-          JSON.stringify(error) || "File not uploaded, please try again",
+          error.message || "File not uploaded, please try again",
           400
         )
       );
@@ -221,7 +225,6 @@ const addLectureToCourseById = async (req, res, next) => {
 
   course.numberOfLectures = course.lectures.length;
 
-  // Save the course object
   await course.save();
 
   res.status(200).json({
@@ -266,12 +269,9 @@ const removeLectureFromCourse = async (req, res, next) => {
   }
 
   // Delete the lecture from cloudinary
-  await cloudinary.v2.uploader.destroy(
-    course.lectures[lectureIndex].lecture.public_id,
-    {
-      resource_type: "video",
-    }
-  );
+  await v2.uploader.destroy(course.lectures[lectureIndex].lecture.public_id, {
+    resource_type: "video",
+  });
 
   // Remove the lecture from the array
   course.lectures.splice(lectureIndex, 1);

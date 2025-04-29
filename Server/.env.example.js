@@ -1,5 +1,5 @@
 PORT=5000
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
 
 MONGO_URI="mongodb+srv://oyeankit6:Ankit152001@cluster0.ffqvab8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 

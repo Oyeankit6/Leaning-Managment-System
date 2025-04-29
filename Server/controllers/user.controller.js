@@ -274,54 +274,60 @@ const changePassword = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const { fullName } = req.body;
-  const userId = req.user.id;
+  try {
+    const { fullName } = req.body;
+    const userId = req.user.id;
 
-  const user = await User.findById(userId);
-
-  if (!user) {
-    return next(new AppError("User does not exist", 400));
-  }
-
-  if (fullName) {
-    user.fullName = fullName;
-  }
-
-  if (req.file) {
-    await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-
-    try {
-      const result = await cloudinary.v2.uploader.upload(req.file.path, {
-        folder: "lms",
-        width: 250,
-        height: 250,
-        gravity: "faces",
-        crop: "fill",
-      });
-
-      if (result) {
-        user.avatar.public_id = result.public_id;
-        user.avatar.secure_url = result.secure_url;
-
-        await fs.rm(`uploads/${req.file.filename}`);
-      }
-    } catch (error) {
-      return next(
-        new AppError(
-          error.message || "File not uploaded , please try again",
-          500
-        )
-      );
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new AppError("User does not exist", 400));
     }
+
+    // Update fullName if provided
+    if (fullName) {
+      user.fullName = fullName;
+    }
+
+    // Handle avatar upload
+    if (req.file) {
+      // Delete old avatar from Cloudinary
+      await v2.uploader.destroy(user.avatar.public_id);
+
+      try {
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+          folder: "lms",
+          width: 250,
+          height: 250,
+          gravity: "faces",
+          crop: "fill",
+          fetch_format: "auto", // Automatically choose the best format
+        });
+
+        if (result) {
+          user.avatar.public_id = result.public_id;
+          user.avatar.secure_url = result.secure_url;
+
+          // Clean up the uploaded image from local storage
+          await fs.rm(`uploads/${req.file.filename}`);
+        }
+      } catch (error) {
+        console.log(error);
+        return next(new AppError("File not uploaded, please try again", 500));
+      }
+    }
+
+    // Save updated user profile
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User profile updated successfully!",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
   }
-
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: "User profile updated successfully!",
-    user,
-  });
 };
 
 export {
