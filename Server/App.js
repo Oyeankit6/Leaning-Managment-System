@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: "https://learningmangemnt.netlify.app/",
     credentials: true,
   })
 );
