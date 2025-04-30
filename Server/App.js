@@ -8,6 +8,7 @@ import courseRoutes from "./routes/course.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
+import miscRoutes from "./routes/miscellaneous.routes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/v1/user", userRoutes);
 
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1", miscRoutes);
 // ✅ Fallback Route
 app.all("/:id", (req, res) => {
   res.status(404).send("OOPS!! 404 Page not found");

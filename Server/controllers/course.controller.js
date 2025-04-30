@@ -78,7 +78,7 @@ const createCourse = async (req, res, next) => {
       try {
         validateThumbnail(file); // optional: validate mimetype and size
 
-        const result = await cloudinary.uploader.upload(file.path, {
+        const result = await v2.uploader.upload(file.path, {
           folder: "lms",
           public_id: `courses/${file.filename}`,
           timeout: 120000,
@@ -164,50 +164,64 @@ const removeCourse = async (req, res, next) => {
     return next(new AppError(error.message, 500));
   }
 };
+
 const addLectureToCourseById = async (req, res, next) => {
   const { title, description } = req.body;
   const { id } = req.params;
 
   let lectureData = {};
 
+  // Check if the title and description are provided
   if (!title || !description) {
     return next(new AppError("Title and Description are required", 400));
   }
 
+  // Find the course by its ID
   const course = await Course.findById(id);
 
+  // If course not found, return an error
   if (!course) {
     return next(new AppError("Invalid course id or course not found.", 400));
   }
 
-  // Run only if user sends a file
+  // Run only if a file is sent
   if (req.file) {
     try {
+      // Upload the video to Cloudinary (or similar service)
       const result = await v2.uploader.upload(req.file.path, {
-        folder: "lms",
-        chunk_size: 50000000, // 50 MB
-        resource_type: "video",
+        folder: "lms", // Specify the folder for Cloudinary
+        chunk_size: 50000000, // 50 MB chunk size for large files
+        resource_type: "video", // Upload as video
       });
 
-      if (result) {
+      // Log the result to ensure the Cloudinary upload is successful
+      console.log("Cloudinary Upload Result:", result);
+
+      // Ensure that the result contains the necessary fields
+      if (result?.public_id && result?.secure_url) {
         lectureData.public_id = result.public_id;
         lectureData.secure_url = result.secure_url;
+      } else {
+        return next(
+          new AppError("Cloudinary upload failed, no URL or ID returned.", 400)
+        );
       }
 
-      // Remove the uploaded file from local storage
+      // Remove the uploaded file from local storage after upload
       await fs.rm(`uploads/${req.file.filename}`);
     } catch (error) {
-      // Clean up uploads folder
+      // If there's an error during upload, clean up the uploads folder
       try {
         const files = await fs.readdir("uploads/");
         for (const file of files) {
-          await fs.unlink(path.join("uploads/", file));
+          await fs.unlink(path.join("uploads/", file)); // Delete all files in the folder
         }
       } catch (fsErr) {
         console.error("Failed to clean up uploads folder:", fsErr);
       }
 
       console.error("Cloudinary Upload Error:", error);
+      // Return a detailed error response
       return next(
         new AppError(
           error.message || "File not uploaded, please try again",
@@ -215,18 +229,25 @@ const addLectureToCourseById = async (req, res, next) => {
         )
       );
     }
+  } else {
+    // If no file was sent, return an error
+    return next(new AppError("No file uploaded.", 400));
   }
 
+  // Push the lecture details (including video info) to the course
   course.lectures.push({
     title,
     description,
     lecture: lectureData,
   });
 
+  // Update the number of lectures in the course
   course.numberOfLectures = course.lectures.length;
 
+  // Save the updated course object
   await course.save();
 
+  // Respond with a success message and the updated course data
   res.status(200).json({
     success: true,
     message: "Course lecture added successfully",

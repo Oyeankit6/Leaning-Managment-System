@@ -243,81 +243,86 @@ const resetPassword = async (req, res, next) => {
 };
 
 const changePassword = async (req, res, next) => {
-  const { oldPassword, newPassword } = req.body;
-  const userId = req.user.id;
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.id;
 
-  if (!oldPassword || !newPassword) {
-    return next(new AppError("All fields are mandatory", 400));
+    if (!oldPassword || !newPassword) {
+      return next(new AppError("All fields are mandatory", 400));
+    }
+
+    if (newPassword.length < 6) {
+      return next(
+        new AppError("Password must be at least 6 characters long", 400)
+      );
+    }
+
+    const user = await User.findById(userId).select("+password");
+
+    if (!user) {
+      return next(new AppError("User does not exist", 400));
+    }
+
+    const isPasswordValid = await user.comparePassword(oldPassword);
+
+    if (!isPasswordValid) {
+      return next(new AppError("Invalid old password!", 400));
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const user = await User.findById(userId).select("+password");
-
-  if (!user) {
-    return next(new AppError("User does not exist", 400));
-  }
-
-  const isPasswordValid = await user.comparePassword(oldPassword);
-
-  if (!isPasswordValid) {
-    return next(new AppError("Invalid old password!", 400));
-  }
-
-  user.password = newPassword;
-
-  await user.save();
-  user.password = undefined;
-
-  res.status(200).json({
-    success: true,
-    message: "Password changed successfully",
-  });
 };
 
 const updateUser = async (req, res, next) => {
   try {
     const { fullName } = req.body;
-    const userId = req.user.id;
+    const userId = req.params.userId || req.user.id;
 
-    // Find the user by ID
     const user = await User.findById(userId);
     if (!user) {
       return next(new AppError("User does not exist", 400));
     }
 
-    // Update fullName if provided
+    // Update full name
     if (fullName) {
       user.fullName = fullName;
     }
 
     // Handle avatar upload
     if (req.file) {
-      // Delete old avatar from Cloudinary
-      await v2.uploader.destroy(user.avatar.public_id);
-
       try {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+        // Delete old avatar
+        await v2.uploader.destroy(user.avatar.public_id);
+
+        // Upload new avatar
+        const result = await v2.uploader.upload(req.file.path, {
           folder: "lms",
           width: 250,
           height: 250,
           gravity: "faces",
           crop: "fill",
-          fetch_format: "auto", // Automatically choose the best format
+          fetch_format: "auto",
         });
 
-        if (result) {
-          user.avatar.public_id = result.public_id;
-          user.avatar.secure_url = result.secure_url;
-
-          // Clean up the uploaded image from local storage
-          await fs.rm(`uploads/${req.file.filename}`);
-        }
-      } catch (error) {
-        console.log(error);
+        user.avatar.public_id = result.public_id;
+        user.avatar.secure_url = result.secure_url;
+      } catch (uploadErr) {
         return next(new AppError("File not uploaded, please try again", 500));
+      } finally {
+        // Clean up uploaded file
+        await fs.rm(`uploads/${req.file.filename}`, { force: true });
       }
     }
 
-    // Save updated user profile
+    // Save updated user
     await user.save();
 
     res.status(200).json({
@@ -325,11 +330,13 @@ const updateUser = async (req, res, next) => {
       message: "User profile updated successfully!",
       user,
     });
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.error("Update error:", err);
+    return next(
+      new AppError("Something went wrong while updating profile", 500)
+    );
   }
 };
-
 export {
   register,
   login,

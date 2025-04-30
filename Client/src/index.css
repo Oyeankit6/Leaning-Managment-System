@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+
+  position: relative;
+}
+
+.loader {
+  border-top-color: #4f46e5;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
