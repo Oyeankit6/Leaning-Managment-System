@@ -11,7 +11,7 @@ import { CourseList } from "./Pages/Course/CourseList";
 import { Contact } from "./Pages/Contact";
 import { Denied } from "./Pages/Denied";
 import { CourseDescription } from "./Pages/Course/CourseDescription";
-import RequireAuth from "./Components/Auth/RequireAuth";
+import RequireAuth from "./components/Auth/RequireAuth";
 import { CreateCourse } from "./Pages/Course/Createcourse";
 import { Profile } from "./Pages/User/Profile";
 import { EditProfile } from "./Pages/User/EditProfile";
