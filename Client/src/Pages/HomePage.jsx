@@ -3,7 +3,7 @@
 import React from "react";
 import HomeLayout from "../Layouts/HomeLayout";
 import { Link } from "react-router-dom";
-import HomeMainImage from "../assets/images/homePageMainImage.png";
+import homePageMainImage from "../assets/Images/homePageMainImage.png";
 
 export const HomePage = () => {
   return (
@@ -40,7 +40,7 @@ export const HomePage = () => {
           {/* Right Content (Image) */}
           <div className="hidden md:block">
             <img
-              src={HomeMainImage}
+              src={homePageMainImage}
               alt="Online Learning"
               className="w-[90%] h-[60vh] max-w-sm mx-auto animate-fade-in-up rounded-lg shadow-xl"
             />
