@@ -4,7 +4,7 @@ import HomeLayout from "../../Layouts/HomeLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { FaEdit, FaTrash, FaVideo, FaPlayCircle } from "react-icons/fa";
 import { MdOutlineSubscriptions } from "react-icons/md";
-import LockedLectureShimmer from "../../Components/LectureCard";
+import LockedLectureShimmer from "../../components/LectureCard";
 import { deleteCourse } from "../../Redux/Slices/CourseSlice";
 
 export const CourseDescription = () => {
