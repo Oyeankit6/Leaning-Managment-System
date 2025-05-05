@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import HomeLayout from "../Layouts/HomeLayout";
 import { Link } from "react-router-dom";
-import education from "../Assets/Images/aboutMainImage.png";
-import BillGates from "../Assets/Images/QuotesPersonalityImage/billGates.png";
-import einstein from "../Assets/Images/QuotesPersonalityImage/einstein.png";
-import Steve from "../Assets/Images/QuotesPersonalityImage/steveJobs.png";
-import mandela from "../Assets/Images/QuotesPersonalityImage/nelsonMandela.png";
-import apj from "../Assets/Images/QuotesPersonalityImage/apj.png";
+import education from "../assets/Images/aboutMainImage.png";
+import BillGates from "../assets/Images/QuotesPersonalityImage/billGates.png";
+import einstein from "../assets/Images/QuotesPersonalityImage/einstein.png";
+import Steve from "../assets/Images/QuotesPersonalityImage/steveJobs.png";
+import mandela from "../assets/Images/QuotesPersonalityImage/nelsonMandela.png";
+import apj from "../assets/Images/QuotesPersonalityImage/apj.png";
 
 const AboutUs = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
