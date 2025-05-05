@@ -4,7 +4,7 @@ import { getAllCourses } from "../../Redux/Slices/CourseSlice";
 import HomeLayouts from "../../Layouts/HomeLayout";
 import CourseCard from "../../Components/CourseCard";
 // Assuming you have a modal for course creation
-import { CreateCourse } from "./Createcourse";
+
 import { useNavigate } from "react-router-dom";
 
 export const CourseList = () => {
