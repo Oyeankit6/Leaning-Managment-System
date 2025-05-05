@@ -220,7 +220,7 @@ export const CourseDescription = () => {
 
         {/* here add a locked and blur card type ui like behined this a  lecture is avaliavle and this should baised pn like admin or user subcribeed or not subscribed  */}
 
-        {role === "user" && subscription?.status !== "active" && (
+        {role === "USER" && subscription?.status !== "active" && (
           <div className="mt-16 space-y-6">
             <h3 className="text-xl font-bold mb-4">Lectures (Locked)</h3>
             {[1, 2, 3].map((_, index) => (
@@ -240,7 +240,7 @@ export const CourseDescription = () => {
         {/* jhgyuvtfsuvbgiuegriuovfsebuhi */}
 
         {(role === "ADMIN" ||
-          (role === "user" && subscription?.status === "active")) && (
+          (role === "USER" && subscription?.status === "active")) && (
           <button
             onClick={() =>
               navigate(`/course/displaylecture/${course._id}`, {
