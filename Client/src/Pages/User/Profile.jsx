@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import HomeLayout from "../../Layouts/HomeLayout";
 import { Link, useNavigate } from "react-router-dom";
 
 export const Profile = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const userData = useSelector((state) => state?.auth?.data);
 
@@ -17,7 +16,7 @@ export const Profile = () => {
             <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-indigo-600">
               <img
                 src={
-                  userData?.user?.avatar?.secure_url ||
+                  userData?.avatar?.secure_url ||
                   "https://via.placeholder.com/150"
                 }
                 alt="Profile"
@@ -25,9 +24,9 @@ export const Profile = () => {
               />
             </div>
             <h2 className="text-3xl font-semibold text-white">
-              {userData?.user?.fullName}
+              {userData?.fullName}
             </h2>
-            <p className="text-gray-400 text-lg">{userData?.user?.email}</p>
+            <p className="text-gray-400 text-lg">{userData?.email}</p>
           </div>
 
           {/* User Details */}
@@ -38,22 +37,22 @@ export const Profile = () => {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-gray-400">Role:</span>
-                <span className="font-semibold">{userData?.user?.role}</span>
+                <span className="font-semibold">{userData?.role}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Email:</span>
-                <span className="font-semibold">{userData?.user?.email}</span>
+                <span className="font-semibold">{userData?.email}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Subscription Status:</span>
                 <span
                   className={`font-semibold ${
-                    userData?.user?.subscription?.status === "active"
+                    userData?.subscription?.status === "active"
                       ? "text-green-500"
                       : "text-red-500"
                   }`}
                 >
-                  {userData?.user?.subscription?.status === "active"
+                  {userData?.subscription?.status === "active"
                     ? "Active"
                     : "Inactive"}
                 </span>
@@ -61,7 +60,7 @@ export const Profile = () => {
             </div>
           </div>
 
-          {/* Edit Profile Button */}
+          {/* Edit Profile and Change Password */}
           <div className="mt-6 flex justify-center space-x-4">
             <button
               className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-300"
@@ -70,7 +69,6 @@ export const Profile = () => {
               Edit Profile
             </button>
 
-            {/* Change Password Link */}
             <Link
               to="/change-password"
               className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition duration-300"
@@ -78,8 +76,14 @@ export const Profile = () => {
               Change Password
             </Link>
           </div>
-          {userData?.user?.subscription?.status === "active" && (
-            <button>Cancel subscription</button>
+
+          {/* Cancel Subscription Button */}
+          {userData?.subscription?.status === "active" && (
+            <div className="mt-4 flex justify-center">
+              <button className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-300">
+                Cancel Subscription
+              </button>
+            </div>
           )}
         </div>
       </div>
