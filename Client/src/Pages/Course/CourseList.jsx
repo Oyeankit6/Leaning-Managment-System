@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllCourses } from "../../Redux/Slices/CourseSlice";
 import HomeLayouts from "../../Layouts/HomeLayout";
-import CourseCard from "../../Components/CourseCard";
+import CourseCard from "../../components/CourseCard";
 // Assuming you have a modal for course creation
 
 import { useNavigate } from "react-router-dom";
