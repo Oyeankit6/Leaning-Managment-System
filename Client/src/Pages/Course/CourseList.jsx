@@ -11,7 +11,7 @@ export const CourseList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { courseData, loading } = useSelector((state) => state.course);
-  const { role } = useSelector((state) => state.auth); // Assuming the user info is stored in auth slice
+  const { role } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getAllCourses());

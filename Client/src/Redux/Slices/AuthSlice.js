@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
 import axiosInstance from "../../Helpers/axiosinstance";
-import { act } from "react";
 
 const initialState = {
   isLoggedIn: localStorage.getItem("isLoggedIn") === "true" || false,
@@ -19,7 +18,8 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
       error: "Failed to create account",
     });
 
-    return (await res).data;
+    const response = await res;
+    return response.data;
   } catch (error) {
     toast.error(error?.response?.data?.message || "Signup failed");
     throw error;
@@ -41,10 +41,12 @@ export const login = createAsyncThunk(
 
       const finalRes = await res;
 
+      const userData = finalRes.data.user;
+
       // Save data to localStorage
       localStorage.setItem("isLoggedIn", true);
-      localStorage.setItem("role", finalRes.data.role || "user");
-      localStorage.setItem("data", JSON.stringify(finalRes.data));
+      localStorage.setItem("role", userData.role || "user");
+      localStorage.setItem("data", JSON.stringify(userData));
 
       return finalRes.data;
     } catch (error) {
@@ -54,25 +56,25 @@ export const login = createAsyncThunk(
   }
 );
 
-/// logout thunk
-
+// ✅ Logout thunk
 export const logout = createAsyncThunk("auth/logout", async () => {
   try {
     const res = axiosInstance.get("user/logout");
+
     toast.promise(res, {
-      loading: "wait! logout in progress....",
-      success: (data) => {
-        return data?.data?.message;
-      },
+      loading: "Wait! Logging out...",
+      success: (data) => data?.data?.message || "Logged out successfully",
       error: "Failed to log out",
     });
+
     return (await res).data;
   } catch (error) {
-    toast.error(error?.response?.data?.message);
+    toast.error(error?.response?.data?.message || "Logout failed");
+    throw error;
   }
 });
 
-///edit profile
+// ✅ Edit profile thunk
 export const editProfile = createAsyncThunk(
   "/auth/editProfile",
   async ({ userId, fullName, avatar }, { rejectWithValue }) => {
@@ -104,25 +106,28 @@ export const editProfile = createAsyncThunk(
   }
 );
 
+// ✅ Auth Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
-
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(createAccount.fulfilled, (state, action) => {
+        const userData = action.payload.user;
         state.isLoggedIn = true;
-        state.data = action.payload;
-        state.role = action.payload.role || "user";
+        state.data = userData;
+        state.role = userData.role;
 
         localStorage.setItem("isLoggedIn", true);
-        localStorage.setItem("role", action.payload.role || "user");
-        localStorage.setItem("data", JSON.stringify(action.payload));
+        localStorage.setItem("role", userData.role);
+        localStorage.setItem("data", JSON.stringify(userData));
       })
       .addCase(login.fulfilled, (state, action) => {
+        const userData = action.payload.user;
         state.isLoggedIn = true;
-        state.data = action.payload;
-        state.role = action.payload.role || "user";
+        state.data = userData;
+        state.role = userData.role;
       })
       .addCase(logout.fulfilled, (state) => {
         state.isLoggedIn = false;
@@ -138,5 +143,4 @@ const authSlice = createSlice({
   },
 });
 
-// export const { logout } = authSlice.actions;
 export default authSlice.reducer;
