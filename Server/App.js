@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "https://learningmangemnt.netlify.app",
+    origin: "https://ssuperlearning.netlify.app",
     credentials: true,
   })
 );
