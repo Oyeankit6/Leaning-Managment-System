@@ -3,7 +3,7 @@
 import React from "react";
 import HomeLayout from "../Layouts/HomeLayout";
 import { Link } from "react-router-dom";
-import HomeMainImage from "../Assets/Images/homePageMainImage.png";
+import HomeMainImage from "../assets/images/homePageMainImage.png";
 
 export const HomePage = () => {
   return (
