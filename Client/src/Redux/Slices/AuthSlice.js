@@ -45,7 +45,7 @@ export const login = createAsyncThunk(
 
       // Save data to localStorage
       localStorage.setItem("isLoggedIn", true);
-      localStorage.setItem("role", userData.role || "user");
+      localStorage.setItem("role", userData.role || "USER");
       localStorage.setItem("data", JSON.stringify(userData));
 
       return finalRes.data;
